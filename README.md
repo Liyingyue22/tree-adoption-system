@@ -26,5 +26,8 @@ tree-adoption-system/
 
 └─ project-docs/   # 项目协作说明、分工与联调记录
 
+- GitHub仓库已建立并完成首次上传
+
+
 
 
