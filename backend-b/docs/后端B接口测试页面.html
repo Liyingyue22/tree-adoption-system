@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后端B 接口测试页面</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Microsoft YaHei", sans-serif; background: #f5f7fa; padding: 20px; color: #333; }
+        h1 { color: #2d6a2d; margin-bottom: 6px; }
+        .info { color: #666; margin-bottom: 20px; font-size: 14px; }
+        .bar { background: #fff; padding: 16px; border-radius: 10px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.08); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        input, select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+        input[type=text] { min-width: 200px; }
+        button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; color: #fff; background: #2d6a2d; }
+        button:hover { opacity: .9; }
+        button.sec { background: #2196F3; }
+        button.warn { background: #ff9800; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        .box { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .box h2 { font-size: 15px; margin-bottom: 12px; color: #444; }
+        pre { background: #1e1e1e; color: #0f0; padding: 12px; border-radius: 6px; font-size: 12px; overflow: auto; max-height: 220px; white-space: pre-wrap; word-break: break-all; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 6px; color: #fff; }
+        .get { background: #61affe; } .post { background: #49cc90; } .put { background: #fca130; } .del { background: #f93e3e; }
+        .status { font-size: 13px; padding: 6px 10px; border-radius: 6px; background: #eef; }
+        .status.ok { background: #e8f5e9; color: #2e7d32; }
+        .status.err { background: #ffebee; color: #c62828; }
+        #snap-img { max-width: 100%; max-height: 260px; border-radius: 8px; margin-top: 10px; display: none; border: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: left; }
+        th { background: #f9f9f9; }
+        .tree-card { border: 1px solid #eee; border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 13px; }
+        .tree-card b { color: #2d6a2d; }
+    </style>
+</head>
+<body>
+    <h1>🌳 后端B 接口测试页面</h1>
+    <p class="info">模拟前端调用后端 B API，请先登录获取 token。默认地址 http://localhost:8080/api</p>
+
+    <div class="bar">
+        <label>API 地址</label>
+        <input type="text" id="baseUrl" value="http://localhost:8080/api">
+        <label>用户名</label>
+        <input type="text" id="username" value="test01">
+        <label>密码</label>
+        <input type="text" id="password" value="123456">
+        <button onclick="doLogin()">登录</button>
+        <button class="sec" onclick="doLoginAdmin()">管理员登录</button>
+        <span class="status" id="loginStatus">未登录</span>
+    </div>
+
+    <div class="grid">
+        <div class="box">
+            <h2><span class="tag get">GET</span> 树木列表（认养大厅）</h2>
+            <button onclick="treeList()">获取列表</button>
+            <div id="treeCards"></div>
+            <pre id="r-trees">点击按钮查看...</pre>
+        </div>
+
+        <div class="box">
+            <h2><span class="tag get">GET</span> 我的树</h2>
+            <button onclick="myTree()">查看我的树</button>
+            <pre id="r-mytree">点击按钮查看...</pre>
+        </div>
+
+        <div class="box">
+            <h2><span class="tag post">POST</span> 认养树木</h2>
+            <label>treeId </label><input type="number" id="adoptId" value="2" style="width:80px">
+            <label>月数 </label><input type="number" id="cycleMonth" value="12" style="width:80px">
+            <button class="warn" onclick="adoptTree()">认养</button>
+            <pre id="r-adopt">选择未认养的树测试...</pre>
+        </div>
+
+        <div class="box">
+            <h2><span class="tag get">GET</span> 摄像头抓拍</h2>
+            <label>treeId </label><input type="number" id="camTreeId" value="1" style="width:80px">
+            <button onclick="snapshot()">抓拍</button>
+            <img id="snap-img" alt="抓拍图片">
+            <pre id="r-snap">点击按钮查看...</pre>
+        </div>
+
+        <div class="box">
+            <h2><span class="tag get">GET</span> 全部订单（管理员）</h2>
+            <button class="sec" onclick="allOrders()">查看订单</button>
+            <pre id="r-orders">需管理员 token...</pre>
+        </div>
+
+        <div class="box">
+            <h2><span class="tag get">GET</span> 硬件状态（管理员）</h2>
+            <button class="sec" onclick="camStatus()">查询状态</button>
+            <pre id="r-camstatus">需管理员 token...</pre>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('bb_token') || '';
+        let role = localStorage.getItem('bb_role') || '';
+
+        function base() { return document.getElementById('baseUrl').value.replace(/\/$/, ''); }
+
+        function updateLoginUI() {
+            const el = document.getElementById('loginStatus');
+            if (token) {
+                el.textContent = '已登录 role=' + role + ' token=' + token.slice(0, 20) + '...';
+                el.className = 'status ok';
+            } else {
+                el.textContent = '未登录';
+                el.className = 'status err';
+            }
+        }
+
+        async function api(method, path, body) {
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (token) opts.headers.token = token;
+            if (body) opts.body = JSON.stringify(body);
+            const resp = await fetch(base() + path, opts);
+            return resp.json();
+        }
+
+        function show(id, data) {
+            document.getElementById(id).textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function doLogin(user, pass) {
+            user = user || document.getElementById('username').value;
+            pass = pass || document.getElementById('password').value;
+            const r = await api('POST', '/user/login', { username: user, password: pass });
+            if (r.code === 0) {
+                token = r.data.token;
+                role = r.data.role;
+                localStorage.setItem('bb_token', token);
+                localStorage.setItem('bb_role', role);
+            }
+            updateLoginUI();
+            show('r-trees', r);
+        }
+
+        function doLoginAdmin() {
+            doLogin('admin01', '123456');
+        }
+
+        async function treeList() {
+            const r = await api('GET', '/tree/list?pageNum=1&pageSize=10');
+            show('r-trees', r);
+            const box = document.getElementById('treeCards');
+            box.innerHTML = '';
+            if (r.code === 0 && r.data && r.data.list) {
+                r.data.list.forEach(t => {
+                    const div = document.createElement('div');
+                    div.className = 'tree-card';
+                    div.innerHTML = `<b>#${t.treeId} ${t.treeType}</b> · ${t.position}<br>`
+                        + `价格 ¥${t.price} · ${t.status === 1 ? '已认养' : '可认养'} · ${t.companyName || ''}`;
+                    box.appendChild(div);
+                });
+            }
+        }
+
+        async function myTree() {
+            show('r-mytree', await api('GET', '/order/myTree'));
+        }
+
+        async function adoptTree() {
+            const treeId = +document.getElementById('adoptId').value;
+            const cycleMonth = +document.getElementById('cycleMonth').value;
+            show('r-adopt', await api('POST', '/order/create', { treeId, cycleMonth }));
+        }
+
+        async function snapshot() {
+            const treeId = document.getElementById('camTreeId').value;
+            const r = await api('GET', '/camera/snapshot?treeId=' + treeId);
+            show('r-snap', r);
+            const img = document.getElementById('snap-img');
+            if (r.code === 0 && r.data && r.data.imgUrl) {
+                img.src = r.data.imgUrl + '?t=' + Date.now();
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+        }
+
+        async function allOrders() {
+            show('r-orders', await api('GET', '/order/all?pageNum=1&pageSize=10'));
+        }
+
+        async function camStatus() {
+            show('r-camstatus', await api('GET', '/camera/status/list'));
+        }
+
+        updateLoginUI();
+    </script>
+</body>
+</html>

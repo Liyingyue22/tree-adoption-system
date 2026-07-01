@@ -1,0 +1,14 @@
+
+---
+
+## 文件3：根目录 `.gitignore`
+
+把下面内容复制进去：
+
+```gitignore
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

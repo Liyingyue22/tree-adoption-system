@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>后端A 接口测试页面</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Microsoft YaHei, sans-serif; background: #f0f4f0; padding: 20px; }
+        h1 { color: #2d6a2d; margin-bottom: 10px; }
+        .info { color: #666; margin-bottom: 20px; font-size: 14px; }
+        .box { background: white; border-radius: 10px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .box h2 { font-size: 16px; margin-bottom: 12px; color: #333; }
+        button { padding: 8px 18px; margin: 4px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn-c { background: #2d6a2d; color: white; }
+        .btn-l { background: #2196F3; color: white; }
+        .btn-s { background: #ff9800; color: white; }
+        button:hover { opacity: 0.85; }
+        pre { background: #1e1e1e; color: #0f0; padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto; white-space: pre-wrap; max-height: 250px; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 6px; }
+        .tag-get { background: #61affe; color: white; }
+        .tag-post { background: #49cc90; color: white; }
+        #player { width: 100%; max-width: 640px; height: 360px; border: 2px solid #ddd; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🌱 后端A - 接口测试页面</h1>
+    <p class="info">所有接口返回 JSON，可直接复制用于后端B开发调试</p>
+
+    <!-- 健康检查 -->
+    <div class="box">
+        <h2><span class="tag tag-get">GET</span> /health — 健康检查</h2>
+        <button class="btn-c" onclick="testHealth()">发送请求</button>
+        <pre id="r1">点击按钮查看返回...</pre>
+    </div>
+
+    <!-- 检测在线 -->
+    <div class="box">
+        <h2><span class="tag tag-post">POST</span> /internal/camera/check — 检测摄像头在线状态</h2>
+        <button class="btn-c" onclick="testCheck()">发送请求</button>
+        <pre id="r2">点击按钮查看返回...</pre>
+    </div>
+
+    <!-- 获取直播流 -->
+    <div class="box">
+        <h2><span class="tag tag-post">POST</span> /internal/camera/rtsp — 获取视频流地址</h2>
+        <button class="btn-l" onclick="testLive()">发送请求</button>
+        <button class="btn-l" onclick="testLivePlay()">直接播放</button>
+        <br><br>
+        <div id="player"></div>
+        <pre id="r3" style="margin-top:10px;">点击按钮查看返回...</pre>
+    </div>
+
+    <!-- 抓拍 -->
+    <div class="box">
+        <h2><span class="tag tag-post">POST</span> /internal/camera/snapshot — 抓拍当前画面</h2>
+        <button class="btn-s" onclick="testSnapshot()">抓拍</button>
+        <br><br>
+        <img id="snap-img" style="max-width:100%;max-height:300px;border-radius:8px;display:none;">
+        <pre id="r4" style="margin-top:10px;">点击按钮查看返回...</pre>
+    </div>
+
+    <!-- 批量状态 -->
+    <div class="box">
+        <h2><span class="tag tag-post">POST</span> /internal/camera/status — 批量查询设备状态</h2>
+        <button class="btn-c" onclick="testStatus()">发送请求</button>
+        <pre id="r5">点击按钮查看返回...</pre>
+    </div>
+
+    <!-- 云台控制 -->
+    <div class="box">
+        <h2><span class="tag tag-post">POST</span> /internal/camera/ptz — 云台控制</h2>
+        <button class="btn-c" onclick="ptz('up')">↑ 上</button>
+        <button class="btn-c" onclick="ptz('down')">↓ 下</button>
+        <button class="btn-c" onclick="ptz('left')">← 左</button>
+        <button class="btn-c" onclick="ptz('right')">→ 右</button>
+        <button class="btn-s" onclick="ptzStop()">停止</button>
+        <pre id="r6" style="margin-top:10px;">点击按钮查看返回...</pre>
+    </div>
+
+    <script>
+        const BASE = 'http://47.107.162.223:5000';
+        const SN = 'GU0249887';
+
+        async function api(method, path, body) {
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) opts.body = JSON.stringify(body);
+            const resp = await fetch(BASE + path, opts);
+            return resp.json();
+        }
+
+        async function testHealth() {
+            const r = await api('GET', '/health');
+            document.getElementById('r1').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function testCheck() {
+            const r = await api('POST', '/internal/camera/check', { device_serial: SN });
+            document.getElementById('r2').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function testLive() {
+            const r = await api('POST', '/internal/camera/rtsp', { device_serial: SN });
+            document.getElementById('r3').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function testLivePlay() {
+            const r = await api('POST', '/internal/camera/rtsp', { device_serial: SN });
+            document.getElementById('r3').textContent = JSON.stringify(r, null, 2);
+            if (r.code === 0) {
+                const shareUrl = 'https://openstatic.ys7.com/ezuikit_share/index.html'
+                    + '?accessToken=' + encodeURIComponent(r.access_token)
+                    + '&url=' + encodeURIComponent(r.url)
+                    + '&themeId=pcLive';
+                document.getElementById('player').innerHTML =
+                    '<iframe src="' + shareUrl + '" width="100%" height="100%" '
+                    + 'style="border:none;" allowfullscreen></iframe>';
+            }
+        }
+
+        async function testSnapshot() {
+            const r = await api('POST', '/internal/camera/snapshot', { device_serial: SN });
+            document.getElementById('r4').textContent = JSON.stringify(r, null, 2);
+            if (r.code === 0) {
+                const img = document.getElementById('snap-img');
+                img.src = BASE + r.data.img_url + '?t=' + Date.now();
+                img.style.display = 'block';
+            }
+        }
+
+        async function testStatus() {
+            const r = await api('POST', '/internal/camera/status', { device_serials: [SN] });
+            document.getElementById('r5').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function ptz(dir) {
+            const r = await api('POST', '/internal/camera/ptz/start', { device_serial: SN, direction: dir });
+            document.getElementById('r6').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function ptzStop() {
+            const r = await api('POST', '/internal/camera/ptz/stop', { device_serial: SN });
+            document.getElementById('r6').textContent = JSON.stringify(r, null, 2);
+        }
+    </script>
+</body>
+</html>

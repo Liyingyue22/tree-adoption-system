@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">
+  <rect width="640" height="420" fill="#f2f7f1"/>
+  <circle cx="320" cy="150" r="90" fill="#78b66b"/>
+  <circle cx="260" cy="180" r="65" fill="#6fab62"/>
+  <circle cx="380" cy="185" r="70" fill="#66a95c"/>
+  <rect x="302" y="220" width="36" height="120" rx="8" fill="#8b5a38"/>
+  <text x="320" y="380" text-anchor="middle" font-size="24" fill="#2f5f34" font-family="Arial, sans-serif">Tree Cover Placeholder</text>
+</svg>

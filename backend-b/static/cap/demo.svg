@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#eef7ee"/>
+  <rect x="0" y="390" width="960" height="150" fill="#c7e7bd"/>
+  <circle cx="470" cy="205" r="110" fill="#79b66a"/>
+  <circle cx="395" cy="240" r="90" fill="#6faf61"/>
+  <circle cx="545" cy="250" r="95" fill="#67a85b"/>
+  <rect x="455" y="270" width="50" height="150" rx="10" fill="#8d5a35"/>
+  <text x="480" y="475" text-anchor="middle" font-size="28" fill="#28552c" font-family="Arial, sans-serif">Camera Snapshot Placeholder</text>
+</svg>

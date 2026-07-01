@@ -1,0 +1,96 @@
+### 用户登录：普通用户
+POST http://localhost:8080/api/user/login
+Content-Type: application/json
+
+{
+  "username": "test01",
+  "password": "123456"
+}
+
+### 用户登录：管理员
+POST http://localhost:8080/api/user/login
+Content-Type: application/json
+
+{
+  "username": "admin01",
+  "password": "123456"
+}
+
+### 用户注册
+POST http://localhost:8080/api/user/register
+Content-Type: application/json
+
+{
+  "username": "test03",
+  "password": "123456",
+  "phone": "13800138003"
+}
+
+### 获取个人信息
+GET http://localhost:8080/api/user/info
+token: 替换成登录返回的token
+
+### 树木列表
+GET http://localhost:8080/api/tree/list?pageNum=1&pageSize=10
+token: 替换成登录返回的token
+
+### 树木详情
+GET http://localhost:8080/api/tree/detail?treeId=1
+token: 替换成登录返回的token
+
+### 用户认养树木
+POST http://localhost:8080/api/order/create
+Content-Type: application/json
+token: 替换成普通用户token
+
+{
+  "treeId": 2,
+  "cycleMonth": 12
+}
+
+### 我的树
+GET http://localhost:8080/api/order/myTree
+token: 替换成普通用户token
+
+### 管理员新增树木
+POST http://localhost:8080/api/tree/add
+Content-Type: application/json
+token: 替换成管理员token
+
+{
+  "companyId": 1,
+  "treeType": "樱花树",
+  "position": "一号农田 A 区 008",
+  "price": 240,
+  "status": 0,
+  "coverImg": "/static/tree/demo.svg",
+  "cameraSn": "CAM-A008",
+  "cameraIp": "192.168.1.108",
+  "camUser": "admin",
+  "camPwd": "123456"
+}
+
+### 管理员订单列表
+GET http://localhost:8080/api/order/all?pageNum=1&pageSize=10
+token: 替换成管理员token
+
+### 摄像头状态
+GET http://localhost:8080/api/camera/status/list
+token: 替换成管理员token
+
+### 抓拍
+GET http://localhost:8080/api/camera/snapshot?treeId=1
+token: 替换成普通用户token
+
+### 视频流
+GET http://localhost:8080/api/camera/rtsp?treeId=1
+token: 替换成普通用户token
+
+### 手动抓拍
+POST http://localhost:8080/api/camera/manualCap
+Content-Type: application/json
+token: 替换成管理员token
+
+{
+  "treeId": 1
+}
