@@ -1,0 +1,128 @@
+// 全局 CSS 变量与基础样式
+:root {
+  // 品牌色
+  --color-forest: #1f4d2e;
+  --color-forest-deep: #163a22;
+  --color-leaf: #5b9d3c;
+  --color-leaf-light: #8bc34a;
+  --color-clay: #d97a3d;
+  --color-clay-deep: #b85e25;
+
+  // 中性色
+  --color-cream: #f7f3ec;
+  --color-cream-dark: #efe8d8;
+  --color-wood: #7a5b3a;
+  --color-ink: #2a2520;
+  --color-mute: #8b8378;
+
+  // 状态色
+  --color-online: #5b9d3c;
+  --color-offline: #c0392b;
+
+  // 阴影
+  --shadow-soft: 0 4px 16px rgba(31, 77, 46, 0.08);
+  --shadow-card: 0 8px 28px rgba(31, 77, 46, 0.12);
+  --shadow-hover: 0 14px 38px rgba(31, 77, 46, 0.18);
+
+  // 字体
+  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
+  --font-sans: 'HarmonyOS Sans SC', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background-color: var(--color-cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+// 自然纹理背景
+.bg-paper {
+  background-color: var(--color-cream);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(91, 157, 60, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(217, 122, 61, 0.04) 0%, transparent 45%);
+}
+
+.bg-grain {
+  position: relative;
+}
+.bg-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.30 0 0 0 0 0.18 0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+}
+
+// 排版工具
+.font-serif { font-family: var(--font-serif); }
+.font-mono { font-family: var(--font-mono); }
+
+// 叶脉装饰 SVG
+.leaf-divider {
+  height: 24px;
+  background: center / contain no-repeat url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 24'><path d='M0 12h100m40 0h100' stroke='%231f4d2e' stroke-width='1' opacity='0.4'/><path d='M120 4c-4 4-4 12 0 16 4-4 4-12 0-16z' fill='%235b9d3c' opacity='0.7'/><path d='M120 12h-12M120 12h12' stroke='%231f4d2e' stroke-width='1' opacity='0.4'/></svg>");
+}
+
+// 滚动条
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(31, 77, 46, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(31, 77, 46, 0.4);
+}
+
+// 渐显动画
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.5s ease both;
+}
+
+// Element Plus 按钮微调
+.el-button {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.el-button--primary {
+  background: linear-gradient(135deg, var(--color-forest) 0%, var(--color-forest-deep) 100%);
+  border-color: var(--color-forest-deep);
+  box-shadow: 0 2px 6px rgba(31, 77, 46, 0.25);
+}
+.el-button--primary:hover {
+  background: linear-gradient(135deg, var(--color-leaf) 0%, var(--color-forest) 100%);
+  border-color: var(--color-forest);
+  box-shadow: 0 4px 12px rgba(31, 77, 46, 0.35);
+}
+
+.el-button--warning {
+  background: linear-gradient(135deg, var(--color-clay) 0%, var(--color-clay-deep) 100%);
+  border-color: var(--color-clay-deep);
+  box-shadow: 0 2px 6px rgba(217, 122, 61, 0.25);
+}
