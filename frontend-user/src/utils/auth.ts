@@ -52,6 +52,19 @@ export function clearAuth(): void {
 // 图片相对路径拼接完整域名
 export function resolveImg(path?: string): string {
   if (!path) return ''
+
+  // 已经是完整链接
   if (/^https?:\/\//.test(path)) return path
-  return `/api${path.startsWith('/') ? '' : '/'}${path}`
+
+  // 前端本地静态资源，直接使用
+  if (path.startsWith('/static/')) return path
+
+  // 后端图片资源路径，拼接 /api
+  if (path.startsWith('/tree/') || path.startsWith('/cap/')) {
+    return `/api${path}`
+  }
+
+  // 兜底
+  return path.startsWith('/') ? path : `/${path}`
 }
+

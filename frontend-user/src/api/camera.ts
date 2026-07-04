@@ -10,7 +10,7 @@ export function getSnapshot(treeId: number | string) {
 }
 
 export function getRtspUrl(treeId: number | string) {
-  return request<string>({
+  return request<any>({
     url: '/camera/rtsp',
     method: 'GET',
     params: { treeId },

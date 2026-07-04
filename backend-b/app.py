@@ -387,14 +387,34 @@ def user_info():
 def tree_list():
     page_num = max(int(request.args.get("pageNum", 1)), 1)
     page_size = min(max(int(request.args.get("pageSize", 10)), 1), 100)
+    status = request.args.get("status", type=int)
     offset = (page_num - 1) * page_size
     db = get_db()
-    total = db.execute("SELECT COUNT(1) FROM tree").fetchone()[0]
+
+    where_sql = ""
+    params = []
+
+    if status in (0, 1):
+        where_sql = "WHERE t.status=?"
+        params.append(status)
+
+    total = db.execute(
+        f"SELECT COUNT(1) FROM tree t {where_sql}",
+        tuple(params),
+    ).fetchone()[0]
+
     rows = db.execute(
-        tree_select_sql("ORDER BY t.treeId DESC LIMIT ? OFFSET ?"),
-        (page_size, offset),
+        tree_select_sql(f"{where_sql} ORDER BY t.treeId DESC LIMIT ? OFFSET ?"),
+        tuple(params + [page_size, offset]),
     ).fetchall()
-    return ok({"pageNum": page_num, "pageSize": page_size, "total": total, "list": rows_to_list(rows)})
+
+    return ok({
+        "pageNum": page_num,
+        "pageSize": page_size,
+        "total": total,
+        "list": rows_to_list(rows),
+    })
+
 
 
 @app.get("/api/tree/detail")
@@ -589,10 +609,10 @@ def camera_status_list():
         if st:
             item["online"] = st.get("online", False)
             item["deviceName"] = st.get("device_name")
-            item["checkTime"] = st.get("last_check") or now_str()
+            item["lastCheck"] = st.get("last_check") or now_str()
         else:
             item["online"] = False
-            item["checkTime"] = now_str()
+            item["lastCheck"] = now_str()
         result.append(item)
     return ok({"list": result})
 
@@ -662,13 +682,31 @@ def company_remove():
 def maintenance_list():
     tree_id = request.args.get("treeId", type=int)
     db = get_db()
+
+    sql = """
+        SELECT
+            m.recordId,
+            m.treeId,
+            m.workerId,
+            m.maintainType,
+            m.description,
+            m.photoUrl,
+            m.maintainTime,
+            t.treeType
+        FROM maintenance_record m
+        LEFT JOIN tree t ON m.treeId = t.treeId
+    """
+    params = []
+
     if tree_id:
-        rows = db.execute(
-            "SELECT * FROM maintenance_record WHERE treeId=? ORDER BY maintainTime DESC", (tree_id,)
-        ).fetchall()
-    else:
-        rows = db.execute("SELECT * FROM maintenance_record ORDER BY maintainTime DESC").fetchall()
+        sql += " WHERE m.treeId=?"
+        params.append(tree_id)
+
+    sql += " ORDER BY m.maintainTime DESC"
+
+    rows = db.execute(sql, tuple(params)).fetchall()
     return ok({"list": rows_to_list(rows)})
+
 
 
 @app.post("/api/maintenance/add")

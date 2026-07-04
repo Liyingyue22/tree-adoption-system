@@ -28,16 +28,27 @@ async function loadMyTrees() {
   loading.value = true
   try {
     const res = await getMyTree()
-    trees.value = res.data ?? []
+    console.log('MyTree response =', res)
+
+    if (Array.isArray(res.data)) {
+      trees.value = res.data
+    } else if (Array.isArray(res.data?.list)) {
+      trees.value = res.data.list
+    } else {
+      trees.value = []
+    }
+
     // 初始化每棵树的摄像头状态
     cameraState.value = new Map(
       trees.value.map((t) => [t.treeId, { ...t }]),
     )
+
     // 并行加载第一棵树的监控
     if (trees.value.length > 0) {
       await loadCameraForTree(trees.value[0])
     }
-  } catch {
+  } catch (err) {
+    console.log('MyTree load error =', err)
     trees.value = []
   } finally {
     loading.value = false
@@ -68,14 +79,22 @@ async function loadRtsp(treeId: number) {
   if (!state) return
   state.cameraLoading = true
   try {
-    const res = await getRtspUrl(treeId)
-    state.rtspUrl = res.data
-  } catch {
+    const res: any = await getRtspUrl(treeId)
+    console.log('RTSP 返回 =', res)
+
+    state.rtspUrl =
+      res.data?.playUrl ||
+      res.data?.url ||
+      res.data?.rtspUrl ||
+      ''
+  } catch (err) {
+    console.log('RTSP 获取失败 =', err)
     state.rtspUrl = ''
   } finally {
     state.cameraLoading = false
   }
 }
+
 
 async function loadCameraForTree(tree: Tree) {
   await Promise.all([loadSnapshot(tree.treeId), loadRtsp(tree.treeId)])

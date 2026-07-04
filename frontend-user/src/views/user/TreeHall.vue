@@ -12,7 +12,7 @@ const router = useRouter()
 const loading = ref(false)
 const treeList = ref<Tree[]>([])
 const total = ref(0)
-const filterStatus = ref<'' | 0 | 1>('')
+const filterStatus = ref<'' | '0' | '1'>('')
 
 const query = reactive({
   pageNum: 1,
@@ -22,20 +22,32 @@ const query = reactive({
 async function loadList() {
   loading.value = true
   try {
-    const res = await getTreeList({
+    console.log('当前筛选状态 filterStatus =', filterStatus.value)
+
+    const params: any = {
       pageNum: query.pageNum,
       pageSize: query.pageSize,
-      ...(filterStatus.value !== '' ? { status: filterStatus.value as 0 | 1 } : {}),
-    })
+    }
+
+    if (filterStatus.value !== '') {
+      params.status = Number(filterStatus.value)
+    }
+    
+    console.log('发送给后端的参数 params =', params)
+    const res = await getTreeList(params)
+    console.log('树木列表返回 =', res)
+
     treeList.value = res.data.list ?? []
     total.value = res.data.total ?? 0
-  } catch {
+  } catch (err) {
+    console.log('树木列表加载失败 =', err)
     treeList.value = []
     total.value = 0
   } finally {
     loading.value = false
   }
 }
+
 
 function handlePageChange(page: number) {
   query.pageNum = page
@@ -101,8 +113,8 @@ onMounted(loadList)
         <span class="filter-label">认养状态</span>
         <el-radio-group v-model="filterStatus" @change="handleFilterChange">
           <el-radio-button label="">全部</el-radio-button>
-          <el-radio-button :label="0">未认养</el-radio-button>
-          <el-radio-button :label="1">已认养</el-radio-button>
+          <el-radio-button label="0">未认养</el-radio-button>
+          <el-radio-button label="1">已认养</el-radio-button>
         </el-radio-group>
         <span class="result-count">共 <em class="font-mono">{{ total }}</em> 棵</span>
       </div>
