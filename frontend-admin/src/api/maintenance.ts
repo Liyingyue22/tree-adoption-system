@@ -6,3 +6,11 @@ export function getMaintenanceList() {
     method: 'GET',
   })
 }
+
+export function addMaintenance(data: any) {
+  return request({
+    url: '/maintenance/add',
+    method: 'POST',
+    data,
+  })
+}
